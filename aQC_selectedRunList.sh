@@ -1,7 +1,7 @@
-# shell script must be first allowed: chmod +x aQC_run.sh
+# shell script must be first allowed: chmod +x aQC_selectedRunList.sh
 #!/bin/bash
 # to run it do (inside ali shell):
-# ./aQC_run.sh
+# ./aQC_selectedRunList.sh
 
 inputFile='singleRun.txt'
 ## aQC meeting 2023-01-24:

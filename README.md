@@ -23,5 +23,5 @@ Usage:
     - An option to use the 'old' path to QC histograms can be selected using `bool oldPath = true` in 'aQC.cxx'.
     - If you want the plots from online QC to be included in the notebook showing the comparison, use `online` for the third pass in the input file and set `_drawOnlineQC = True` in 'notebook_aQC_compPasses.ipynb'
     - If you do not want the plots in the output .html files to be interactive, remove `%jsroot on` from the jupyter notebooks
-5. Open another Terminal window and execute 'aQC_selectedRunList.sh'
+5. Open another Terminal window, load O2 and execute 'aQC_selectedRunList.sh'
 6. Downloaded files and printed notebooks will be stored in the 'results/' folder.
