@@ -26,7 +26,7 @@ inputFile='singleRun.txt'
 #inputFile='LHC22t_apass2_O2-3530_group2.txt'
 ## aQC meeting 2023-02-21:
 
-root -q 'aQC.cxx("'$inputFile'")'
+root -q 'aQC.cxx("'inputRunLists/$inputFile'")'
 
 n=1 
 period=""
@@ -46,30 +46,31 @@ printNotebook_singlePass () {
         jupyter nbconvert --to html ${file}.ipynb --no-input --TagRemovePreprocessor.remove_cell_tags onlyMC
     fi
     rm -r ${file}.ipynb
-    mv ${file}.html Results/${period}/notebook_singlePass/${run}_${currentPass}.html
+    mv ${file}.html results/${period}/notebook_singlePass/${run}_${currentPass}.html
 }
 
 while read line; do
     if (( $n == 1 )) ; then
         period=$line
-        echo "period:  $period"
+        echo "period: $period"
     elif (( $n == 2 )) ; then
         pass1=$line
-        echo "pass1:   $pass1"
+        echo "pass1:  $pass1"
     elif (( $n == 3 )) ; then
         pass2=$line
-        echo "pass2:   $pass2"
+        echo "pass2:  $pass2"
     elif (( $n == 4 )) ; then
         pass3=$line
-        echo "pass3:   $pass3"
+        echo "pass3:  $pass3"
     elif (( $n == 5 )) ; then
         nRuns=$line
-        echo "# runs:  $nRuns"
+        echo "# runs: $nRuns"
     else
         run=$line
-        echo "run: $run"
+        echo ""
+        echo "run $run"
         # QC plots for individual passes
-        mkdir -p Results/${period}/notebook_singlePass/
+        mkdir -p results/${period}/notebook_singlePass/
         # pass one
         if [ $pass1 != "none" ] ; then
             currentPass=$pass1
@@ -86,24 +87,24 @@ while read line; do
             printNotebook_singlePass
         fi
         # if other passes available, do the comparison
-        if [ $pass2 = "none" ] ; then
-            echo "no other passes"
+        if [ $pass2 == "none" ] ; then
+            echo "No passes selected for comparison."
         else
             # comparison of the two passes
-            mkdir -p Results/${period}/notebook_compPasses/
+            mkdir -p results/${period}/notebook_compPasses/
             file=MFTaQC_${run}_${pass1}_vs_${pass2}
             papermill -p _period $period -p _pass1 $pass1 -p _pass2 $pass2 -p _pass3 $pass3 -p _run $run notebook_aQC_compPasses.ipynb ${file}.ipynb
             jupyter nbconvert --to html ${file}.ipynb --no-input
             rm -r ${file}.ipynb
-            mv ${file}.html Results/${period}/notebook_compPasses/${run}_${pass1}_vs_${pass2}.html
+            mv ${file}.html results/${period}/notebook_compPasses/${run}_${pass1}_vs_${pass2}.html
         fi
     fi
     n=$((n+1))
-done < $inputFile
+done < inputRunLists/$inputFile
 
+## sources:
 # https://stackoverflow.com/questions/36901154/how-export-a-jupyter-notebook-to-html-from-the-command-line
 # https://stackoverflow.com/questions/49907455/hide-code-when-exporting-jupyter-notebook-to-html
 # https://www.wrighters.io/parameters-jupyter-notebooks-with-papermill/
 # https://pypi.org/project/jupyter-runner/ 
 # https://stackoverflow.com/questions/31517194/how-to-hide-one-specific-cell-input-or-output-in-ipython-notebook
-

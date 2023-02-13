@@ -11,7 +11,7 @@
 #include "TH1.h"
 #include "TH2.h"
 
-bool rewriteAll = false;
+bool rewriteFiles = false;
 bool oldPath = false;
 
 vector<int>* ReadInput(string sIn, string &period, string &pass1, string &pass2, string &pass3)
@@ -30,12 +30,12 @@ vector<int>* ReadInput(string sIn, string &period, string &pass1, string &pass2,
         ifs >> run;
         runList->push_back(run);
     }
-    cout << "Input:\n"
+    cout << "## Input: ##\n"
          << "period: " << period << "\n"
          << "pass1:  " << pass1 << "\n"
          << "pass2:  " << pass2 << "\n"
          << "pass3:  " << pass3 << "\n"
-         << "run list (" << nRuns << " runs):\n";
+         << "# runs: " << nRuns << "\n";
     for(int i = 0; i < nRuns; i++) cout << Form("%03i -> ",i+1) << runList->at(i) << "\n";
     return runList;
 }
@@ -68,7 +68,7 @@ string RenameHisto(string oldName)
 
 void SaveHistos(string period, int runNo, string pass)
 {
-    gSystem->Exec(Form("mkdir -p Results/%s/runsRootFiles/",period.data()));
+    gSystem->Exec(Form("mkdir -p results/%s/runsRootFiles/",period.data()));
     // online QC?
     bool online = false;
     if(pass == "online") online = true;
@@ -76,18 +76,18 @@ void SaveHistos(string period, int runNo, string pass)
     bool isMC = false;
     if(pass == "passMC") isMC = true;
     // check if the file already exists
-    string sFile = Form("Results/%s/runsRootFiles/%i_%s.root",period.data(),runNo,pass.data());
+    string sFile = Form("results/%s/runsRootFiles/%i_%s.root",period.data(),runNo,pass.data());
     bool fileExists = !gSystem->AccessPathName(sFile.data());
-    if(fileExists && !rewriteAll) {
-        cout << sFile << " already exists and won't be recreated. Skipping...\n";
+    if(fileExists && !rewriteFiles) {
+        cout << sFile << ": already downloaded -> skipping...\n";
     } else {
-        cout << sFile << " doesn't exist or will be recreated. Histograms will be loaded now:\n";
+        cout << sFile << ": will be downloaded now.\n";
         TFile* f = new TFile(sFile.data(),"recreate");
         string sPath = "";
         if(isMC) {
             if(!online) sPath += "qc_mc/";
             else { 
-                cout << "Online QC not available for MC. Terminating...\n";
+                cout << "Online QC not available for MC runs -> terminating...\n";
                 return;
             }
         } else {
@@ -174,5 +174,7 @@ void aQC(string sIn)
     if(pass2 != "none") for(int i = 0; i < nRuns; i++) SaveHistos(period.data(),runList->at(i),pass2);
     // if not MC -> online QC
     if(pass3 != "none") for(int i = 0; i < nRuns; i++) SaveHistos(period.data(),runList->at(i),pass3);
+
+    cout << "Done.\n\n";
     return;
 }

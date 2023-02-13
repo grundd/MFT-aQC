@@ -3,5 +3,5 @@
 *.html
 
 # Folders to ignore:
-Documents/
-Results/
+documents/
+results/
