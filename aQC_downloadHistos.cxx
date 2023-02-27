@@ -1,47 +1,20 @@
-// aQC.cxx
-// David Grund, Jan 18, 2023
+// aQC_downloadHistos.cxx
+// David Grund, Feb 27, 2023
 // MFT asynchronous Quality Control
 
-// cpp
-#include <vector>
-#include <fstream>
 // root
 #include "TSystem.h"
 #include "TFile.h"
 #include "TH1.h"
 #include "TH2.h"
+// my headers
+#include "aQC_utilities.h"
 
 bool rewriteFiles = false;
 bool oldPath = false;
 
-vector<int>* ReadInput(string sIn, string &period, string &pass1, string &pass2, string &pass3)
-{
-    std::vector<int>* runList = new std::vector<int>;
-    ifstream ifs;
-    ifs.open(sIn);
-    int nRuns;
-    ifs >> period
-        >> pass1
-        >> pass2
-        >> pass3
-        >> nRuns;
-    for(int i = 0; i < nRuns; i++) {
-        int run;
-        ifs >> run;
-        runList->push_back(run);
-    }
-    cout << "## Input: ##\n"
-         << "period: " << period << "\n"
-         << "pass1:  " << pass1 << "\n"
-         << "pass2:  " << pass2 << "\n"
-         << "pass3:  " << pass3 << "\n"
-         << "# runs: " << nRuns << "\n";
-    for(int i = 0; i < nRuns; i++) cout << Form("%03i -> ",i+1) << runList->at(i) << "\n";
-    return runList;
-}
-
 template <typename TH>
-TH* LoadHisto(string path, string histName, int runNo, string pass)
+TH* loadHisto(string path, string histName, int runNo, string pass)
 {
     o2::ccdb::CcdbApi api;
     if(pass == "passMC") api.init("ccdb-test.cern.ch:8080");
@@ -54,7 +27,7 @@ TH* LoadHisto(string path, string histName, int runNo, string pass)
     else  return NULL;
 }
 
-string RenameHisto(string oldName)
+string renameHisto(string oldName)
 {
     string newName = oldName;
     char slash = '/';
@@ -66,7 +39,7 @@ string RenameHisto(string oldName)
     return newName;
 }
 
-void SaveHistos(string period, int runNo, string pass)
+void saveHistos(string period, int runNo, string pass)
 {
     gSystem->Exec(Form("mkdir -p results/%s/runsRootFiles/",period.data()));
     // online QC?
@@ -139,19 +112,19 @@ void SaveHistos(string period, int runNo, string pass)
             sNamesTH1.push_back("Clusters/mGroupedClusterSizeSummary");
         }
         for(int i = 0; i < sNamesTH2.size(); i++) {
-            TH2F* h = LoadHisto<TH2F>(sPath,sNamesTH2[i],runNo,pass);
+            TH2F* h = loadHisto<TH2F>(sPath,sNamesTH2[i],runNo,pass);
             if(h) {
                 cout << "run " << runNo << ", " << pass << ": " << h->GetName() << " loaded\n";
                 f->cd();
-                h->Write(RenameHisto(h->GetName()).data());
+                h->Write(renameHisto(h->GetName()).data());
             }
         }
         for(int i = 0; i < sNamesTH1.size(); i++) {
-            TH1F* h = LoadHisto<TH1F>(sPath,sNamesTH1[i],runNo,pass);
+            TH1F* h = loadHisto<TH1F>(sPath,sNamesTH1[i],runNo,pass);
             if(h) {
                 cout << "run " << runNo << ", " << pass << ": " << h->GetName() << " loaded\n";
                 f->cd();
-                h->Write(RenameHisto(h->GetName()).data());
+                h->Write(renameHisto(h->GetName()).data());
             }
         }
         f->Write("",TObject::kWriteDelete);
@@ -160,20 +133,18 @@ void SaveHistos(string period, int runNo, string pass)
     return;
 }
 
-void aQC(string sIn)
+void aQC_downloadHistos(string sIn)
 {
     string period;
-    string pass1;
-    string pass2;
-    string pass3;
-    std::vector<int>* runList = ReadInput(sIn,period,pass1,pass2,pass3);
+    string pass[5];
+    std::vector<int>* runList = readInput(sIn,period,pass[0],pass[1],pass[2],pass[3],pass[4]);
     int nRuns = runList->size();
-    // QC of the first pass
-    for(int i = 0; i < nRuns; i++) SaveHistos(period.data(),runList->at(i),pass1);
-    // QC of the second pass (if any)
-    if(pass2 != "none") for(int i = 0; i < nRuns; i++) SaveHistos(period.data(),runList->at(i),pass2);
-    // if not MC -> online QC
-    if(pass3 != "none") for(int i = 0; i < nRuns; i++) SaveHistos(period.data(),runList->at(i),pass3);
+
+    for(int r = 0; r < nRuns; r++) {
+        for(int p = 0; p < 5; p++) {
+            if(pass[p] != "none") saveHistos(period,runList->at(r),pass[p]);
+        }
+    }
 
     cout << "Done.\n\n";
     return;
