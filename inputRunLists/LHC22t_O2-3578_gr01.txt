@@ -1,7 +1,9 @@
 LHC22t
+online
+apass1
 apass2
 apass3
-online
+none
 3
 529674
 529690

@@ -1,7 +1,9 @@
 LHC22q
+online
 apass1
 apass2
-online
+none
+none
 12
 528991
 528997

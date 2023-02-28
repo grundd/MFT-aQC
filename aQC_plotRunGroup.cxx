@@ -1,6 +1,7 @@
 // aQC_plotRunGroup.cxx
 // David Grund, Feb 27, 2023
 // MFT asynchronous Quality Control
+// root 'aQC_plotRunGroup.cxx("'inputRunLists/LHC22t_O2-3578_gr01.txt'")'
 
 // root headers
 #include "TSystem.h"
@@ -74,7 +75,7 @@ string histosTitles[5] = {
 void setAxes(TH1F* h)
 {
     // font sizes
-    int sizePixels = 18;
+    int sizePixels = 20;
     h->GetXaxis()->SetTitleFont(63);
     h->GetXaxis()->SetTitleSize(sizePixels);
     h->GetYaxis()->SetTitleFont(63);
@@ -85,13 +86,44 @@ void setAxes(TH1F* h)
     h->GetYaxis()->SetLabelSize(sizePixels);
     // other
     h->GetXaxis()->SetDecimals(1);
-    h->GetXaxis()->SetTitleOffset(1.05);
-    h->GetYaxis()->SetTitleOffset(1.6);
+    h->GetXaxis()->SetTitleOffset(0.95);
+    h->GetYaxis()->SetTitleOffset(1.65);
     h->GetYaxis()->SetMaxDigits(3);
     return;
 }
 
-void plotRunGroup(string period, string pass, string histName, string title, int refRun = 529009)
+string getGroupName(string oldName)
+{
+    string newName = oldName;
+    // erase everything up to the last '/' (including)
+    char slash = '/';
+    size_t index = newName.find_last_of(slash);
+    if (index < string::npos) {
+        // erase everything up to 'index'
+        newName.erase(0,index+1);
+    }
+    // erase '.txt'
+    char dot = '.';
+    index = newName.find_last_of(dot);
+    if (index < string::npos) {
+        // erase everything after 'index' (including)
+        newName.erase(index,string::npos);
+    }
+    return newName;
+}
+
+int getRefRun(string period)
+{
+    int refRun = -1;
+    // LHC22o ??
+    if(period == "LHC22p") refRun = 528617;
+    if(period == "LHC22q") refRun = 529038;
+    if(period == "LHC22r") refRun = 529324;
+    if(period == "LHC22t") refRun = 529691;
+    return refRun;
+}
+
+void plotRunGroup(string groupName, string period, string pass, string histName, string title, int refRun = -1)
 {
     TObjArray* arr = new TObjArray(nRuns);
     arr->SetOwner();
@@ -128,7 +160,7 @@ void plotRunGroup(string period, string pass, string histName, string title, int
     }
     // make the plot
     TCanvas c(histName.data(),"",800,600);
-    float x = 0.84;
+    float x = 0.82;
     float y = 0.40;
     gStyle->SetOptStat(0);
     gStyle->SetOptTitle(0);
@@ -141,22 +173,24 @@ void plotRunGroup(string period, string pass, string histName, string title, int
     TPad p1("p1","",0.0,y,x,1.0);
     p1.SetTopMargin(0.09);
     p1.SetBottomMargin(0.);
-    p1.SetRightMargin(0.025);
-    p1.SetLeftMargin(0.10);
+    p1.SetRightMargin(0.035);
+    p1.SetLeftMargin(0.11);
     //p1.SetFillColor(kRed);
     p1.Draw();
     p1.cd();
-    TH1F* hAxisUpp = gPad->DrawFrame(xMin,yMin,xMax,yMax*1.02);
+    TH1F* hAxisUpp = gPad->DrawFrame(xMin,yMin,xMax,yMax*1.05);
     setAxes(hAxisUpp);
-    hAxisUpp->GetYaxis()->SetTitle("# entries (normalized to integral)");
+    hAxisUpp->GetYaxis()->SetTitle("# entries (norm. to 1.0)");
     hAxisUpp->Draw("AXIS");
     for(int r = 0; r < nRuns; r++) {
         TH1F* h = (TH1F*)arr->At(r);
         if(h) {
-            h->SetLineColor(colorTable[r]);
-            h->SetLineStyle(1 + (r % 3));
-            h->SetLineWidth(2);
-            h->Draw("HIST SAME");
+            if(h->GetEntries() > 0) {
+                h->SetLineColor(colorTable[r]);
+                h->SetLineStyle(1 + (r % 3));
+                h->SetLineWidth(2);
+                h->Draw("HIST SAME");
+            }
         }
     }
     l->DrawLatex(0.5,0.94,Form("%s %s: %s",period.data(),pass.data(),title.data()));
@@ -164,9 +198,9 @@ void plotRunGroup(string period, string pass, string histName, string title, int
     c.cd();
     TPad p2("p2","",0.0,0.0,x,y);
     p2.SetTopMargin(0.);
-    p2.SetBottomMargin(0.18);
-    p2.SetRightMargin(0.025);
-    p2.SetLeftMargin(0.10);
+    p2.SetBottomMargin(0.19);
+    p2.SetRightMargin(0.035);
+    p2.SetLeftMargin(0.11);
     //p2.SetFillColor(kBlue);
     p2.Draw();
     p2.cd();
@@ -178,10 +212,12 @@ void plotRunGroup(string period, string pass, string histName, string title, int
     for(int r = 0; r < nRuns; r++) {
         TH1F* h = (TH1F*)arr->At(r);
         if(h) {
-            TH1F* hRatio = (TH1F*)h->Clone(Form("hRatio_%i",r));
-            //hRatio->Sumw2();
-            hRatio->Divide(hRefRun);
-            hRatio->Draw("HIST SAME");
+            if(h->GetEntries() > 0) {
+                TH1F* hRatio = (TH1F*)h->Clone(Form("hRatio_%i",r));
+                //hRatio->Sumw2();
+                hRatio->Divide(hRefRun);
+                hRatio->Draw("HIST SAME");
+            }
         }
     }
     // panel on the right: legends
@@ -194,17 +230,21 @@ void plotRunGroup(string period, string pass, string histName, string title, int
     TLegend leg(0.0,ytop-(nRuns)*0.027,0.95,ytop);
     for(int r = 0; r < nRuns; r++) {
         TH1F* h = (TH1F*)arr->At(r);
-        if(h) leg.AddEntry(h,Form("%i",runList->at(r)),"L");
+        bool hNonEmpty = false;
+        if(h) {
+            if(h->GetEntries() > 0) hNonEmpty = true;
+        }
+        if(hNonEmpty) leg.AddEntry(h,Form("%i",runList->at(r)),"L");
         else leg.AddEntry((TObject*)0,Form("%i: n/a",runList->at(r)),"");
     }
     leg.SetTextFont(63);
-    leg.SetTextSize(16);
+    leg.SetTextSize(17);
     leg.SetBorderSize(0);
     leg.SetFillStyle(0);
     leg.SetMargin(0.28);
     leg.Draw();
     // print the plot
-    c.Print(Form("results/plotRunGroup/%s_%s.pdf",pass.data(),histName.data()));
+    c.Print(Form("results/plotRunGroup/%s/%s_%s.pdf",groupName.data(),pass.data(),histName.data()));
     cout << "This pass done.\n";
     return;
 }
@@ -220,8 +260,15 @@ void aQC_plotRunGroup(string sIn)
     for(int p = 0; p < 5; p++) { // loop over passes
         if(pass[p] != "none") {
             for(int h = 0; h < 5; h++) { // loop over histograms
-                cout << "Processing " << pass[p] << ", " << histosNames[h] << "\n";
-                plotRunGroup(period,pass[p],histosNames[h],histosTitles[h]);
+                string groupName = getGroupName(sIn);
+                int refRun = getRefRun(period);
+                cout << "\nProcessing:\n" 
+                     << "group:  " << groupName << "\n"
+                     << "period: " << period << "\n"
+                     << "pass:   " << pass[p] << "\n"
+                     << "histo:  " << histosNames[h] << "\n";
+                gSystem->Exec(Form("mkdir -p results/plotRunGroup/%s/",groupName.data()));
+                plotRunGroup(groupName,period,pass[p],histosNames[h],histosTitles[h],refRun);
             }
         }
     }

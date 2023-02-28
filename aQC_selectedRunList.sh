@@ -12,33 +12,33 @@ compareWithOnline="false"
 inputFile='singleRun.txt'
 ## aQC meeting 2023-01-24:
 #inputFile='LHC22i1_passMC_O2-3486.txt'
-#inputFile='LHC22o_apass2_O2-3496_group1.txt'
-#inputFile='LHC22o_apass2_O2-3496_group2.txt'
+#inputFile='LHC22o_O2-3496_gr01.txt'
+#inputFile='LHC22o_O2-3496_gr02.txt'
 ## aQC meeting 2023-01-31:
-#inputFile='LHC22o_apass2_O2-3496_group3.txt'
-#inputFile='LHC22r_apass2_O2-3526_group1.txt'
+#inputFile='LHC22o_O2-3496_gr03.txt'
+#inputFile='LHC22r_O2-3526_gr01.txt'
 ## aQC meeting 2023-02-07:
-#inputFile='LHC22p_apass2_O2-3529_group1.txt'
-#inputFile='LHC22r_apass2_O2-3526_group2.txt'
-#inputFile='LHC22t_apass2_O2-3530_group1.txt'
+#inputFile='LHC22p_O2-3529_gr01.txt'
+#inputFile='LHC22r_O2-3526_gr02.txt'
+#inputFile='LHC22t_O2-3530_gr01.txt'
 ## aQC meeting 2023-02-14:
-#inputFile='LHC22o_apass2_O2-3496_group4a.txt'
-#inputFile='LHC22o_apass2_O2-3496_group4b.txt'
-#inputFile='LHC22o_apass2_O2-3496_group4c.txt'
-#inputFile='LHC22o_apass2_test_O2-3496.txt'
-#inputFile='LHC22o_HIR_apass2_O2-3496.txt'
-#inputFile='LHC22q_apass2_O2-3548_group1.txt'
-#inputFile='LHC22r_apass2_O2-3526_group3.txt'
-#inputFile='LHC22t_apass2_O2-3530_group2.txt'
-#inputFile='LHC22o_apass2_O2-3496_rest.txt'
+#inputFile='LHC22o_O2-3496_gr04a.txt'
+#inputFile='LHC22o_O2-3496_gr04b.txt'
+#inputFile='LHC22o_O2-3496_gr04c.txt'
+#inputFile='LHC22o_O2-3496_test.txt
+#inputFile='LHC22o_O2-3496_HIR.txt'
+#inputFile='LHC22q_O2-3548_gr01.txt'
+#inputFile='LHC22r_O2-3526_gr03.txt'
+#inputFile='LHC22t_O2-3530_gr02.txt'
+#inputFile='LHC22o_O2-3496_rest.txt'
 ## aQC meeting 2023-02-21:
 # nothing
 ## aQC meeting 2023-02-28:
-#inputFile='LHC22m_apass3_O2-3570_group1.txt'
-#inputFile='LHC22p_apass3_O2-3573_group1.txt'
-#inputFile='LHC22q_apass3_O2-3569_group1.txt'
-#inputFile='LHC22r_apass3_O2-3574_group1.txt'
-#inputFile='LHC22t_apass3_O2-3578_group1.txt'
+#inputFile='LHC22m_O23570_gr01.txt'
+#inputFile='LHC22p_O2-3573_gr01.txt'
+#inputFile='LHC22q_O2-3569_gr01.txt'
+#inputFile='LHC22r_O2-3574_gr01.txt'
+#inputFile='LHC22t_O2-3578_gr01.txt'
 ## aQC meeting 2023-03-07
 
 root -q 'aQC_downloadHistos.cxx("'inputRunLists/$inputFile'")'

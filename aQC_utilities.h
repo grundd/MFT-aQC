@@ -25,13 +25,13 @@ vector<int>* readInput(string sIn, string &period,
         ifs >> run;
         runList->push_back(run);
     }
-    cout << "## Input: ##\n"
+    cout << "\nInput:\n"
          << "period: " << period << "\n"
-         << "pass 0:  " << pass0 << "\n"
-         << "pass 1:  " << pass1 << "\n"
-         << "pass 2:  " << pass2 << "\n"
-         << "pass 3:  " << pass3 << "\n"
-         << "pass 4:  " << pass4 << "\n"
+         << "pass 0: " << pass0 << "\n"
+         << "pass 1: " << pass1 << "\n"
+         << "pass 2: " << pass2 << "\n"
+         << "pass 3: " << pass3 << "\n"
+         << "pass 4: " << pass4 << "\n"
          << "# runs: " << nRuns << "\n";
     for(int i = 0; i < nRuns; i++) cout << Form("%03i -> ",i+1) << runList->at(i) << "\n";
     return runList;
