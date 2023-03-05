@@ -6,7 +6,6 @@
 # settings:
 plotSingle=""
 plotComparison="True"
-compareWithOnline="false"
 
 # input file selection:
 inputFile='singleRun.txt'
@@ -41,8 +40,8 @@ inputFile='singleRun.txt'
 #inputFile='LHC22t_O2-3578_gr01.txt'
 ## aQC meeting 2023-03-07
 
-root -q 'aQC_downloadHistos.cxx("'inputRunLists/$inputFile'")'
-root -q 'aQC_plotRunGroup.cxx("'inputRunLists/$inputFile'")'
+#root -q 'aQC_downloadHistos.cxx("'inputRunLists/$inputFile'")'
+#root -q 'aQC_plotRunGroup.cxx("'inputRunLists/$inputFile'")'
 
 n=1 
 period=""
@@ -123,10 +122,12 @@ while read line; do
         # do the comparison
         if [[ $plotComparison == "False" ]] ; then
             echo "No passes selected for comparison."
-        #else
+        else
             mkdir -p results/${period}/notebook_compPasses/
             file=${run}_comp
-            papermill -p _period $period -p _pass1 $pass1 -p _pass2 $pass2 -p _pass3 $pass3 -p _run $run -p _compareToOnline $compareWithOnline notebook_aQC_compPasses.ipynb ${file}.ipynb
+            # create the notebook for this configuration (pass all the arguments)
+            papermill -p _period $period -p _pass1 $pass0 -p _pass1 $pass1 -p _pass2 $pass2 -p _pass3 $pass3 -p _pass4 $pass4 -p _run $run notebook_aQC_compPasses.ipynb ${file}.ipynb
+            # convert it to html
             jupyter nbconvert --to html ${file}.ipynb --no-input
             rm -r ${file}.ipynb
             mv ${file}.html results/${period}/notebook_compPasses/${file}.html

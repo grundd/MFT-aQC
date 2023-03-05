@@ -27,6 +27,18 @@ TH* loadHisto(string path, string histName, int runNo, string pass)
     else  return NULL;
 }
 
+string renameHisto(string oldName)
+{
+    string newName = oldName;
+    char slash = '/';
+    size_t index = newName.find_last_of(slash);
+    if (index < string::npos) {
+        // erase everything up to 'index'
+        newName.erase(0,index+1);
+    }
+    return newName;
+}
+
 void saveHistos(string period, int runNo, string pass)
 {
     gSystem->Exec(Form("mkdir -p results/%s/runsRootFiles/",period.data()));
