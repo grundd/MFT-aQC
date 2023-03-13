@@ -20,6 +20,7 @@ std::vector<int>* runList;
 int nRuns;
 
 Color_t colorTable[] = {
+    // 36 colors available
     kBlue,
     kBlue+1,
     kBlue+2,
@@ -115,12 +116,43 @@ string getGroupName(string oldName)
 int getRefRun(string period)
 {
     int refRun = -1;
-    // LHC22o ??
+    if(period == "LHC22o") refRun = 527852;
     if(period == "LHC22p") refRun = 528617;
     if(period == "LHC22q") refRun = 529038;
     if(period == "LHC22r") refRun = 529324;
     if(period == "LHC22t") refRun = 529691;
     return refRun;
+}
+
+bool runGood(int run)
+{
+    bool runGood = true;
+    int badRuns[] = {
+        // LHC22o
+        526486,
+        527016,
+        527028,
+        527259,
+        527260,
+        528026,
+        528332,
+        528381,
+        // LHC22p
+        // none
+        // LHC22q
+        528991,
+        // LHC22r
+        529242,
+        // LHC22t
+        529450,
+        529674,
+        529675
+    };
+    int nBadRuns = sizeof(badRuns)/sizeof(badRuns[0]);
+    for(int i = 0; i < nBadRuns; i++) {
+        if(run == badRuns[i]) runGood = false;
+    }
+    return runGood;
 }
 
 void plotRunGroup(string groupName, string period, string pass, string histName, string title, int refRun = -1)
@@ -139,8 +171,9 @@ void plotRunGroup(string groupName, string period, string pass, string histName,
             gROOT->cd();
             TH1F* hClone = (TH1F*)h->Clone(Form("h_%i",r));
             hClone->Scale(1./h->Integral());
-            if(hClone->GetMaximum() > yMax) yMax = hClone->GetMaximum();
-            if(hClone->GetMinimum() < yMin) yMin = hClone->GetMinimum();
+            bool runNotBad = runGood(runList->at(r));
+            if(hClone->GetMaximum() > yMax && runNotBad == true) yMax = hClone->GetMaximum();
+            if(hClone->GetMinimum() < yMin && runNotBad == true) yMin = hClone->GetMinimum();
             xMin = hClone->GetBinLowEdge(1);
             xMax = hClone->GetBinLowEdge(hClone->GetNbinsX()+1);
             arr->AddAt(hClone, r);
@@ -157,6 +190,9 @@ void plotRunGroup(string groupName, string period, string pass, string histName,
         hRefRun = (TH1F*)h->Clone("hRefRun");
         f->Close();
         hRefRun->Scale(1./hRefRun->Integral());
+    } else {
+        cout << "No reference run defined. Terminating... \n";
+        return;
     }
     // make the plot
     TCanvas c(histName.data(),"",800,600);
@@ -184,7 +220,7 @@ void plotRunGroup(string groupName, string period, string pass, string histName,
     hAxisUpp->Draw("AXIS");
     for(int r = 0; r < nRuns; r++) {
         TH1F* h = (TH1F*)arr->At(r);
-        if(h) {
+        if(h && runGood(runList->at(r)) == true) {
             if(h->GetEntries() > 0) {
                 h->SetLineColor(colorTable[r]);
                 h->SetLineStyle(1 + (r % 3));
@@ -211,7 +247,7 @@ void plotRunGroup(string groupName, string period, string pass, string histName,
     hAxisLow->Draw("AXIS");
     for(int r = 0; r < nRuns; r++) {
         TH1F* h = (TH1F*)arr->At(r);
-        if(h) {
+        if(h && runGood(runList->at(r)) == true) {
             if(h->GetEntries() > 0) {
                 TH1F* hRatio = (TH1F*)h->Clone(Form("hRatio_%i",r));
                 //hRatio->Sumw2();
@@ -231,11 +267,13 @@ void plotRunGroup(string groupName, string period, string pass, string histName,
     for(int r = 0; r < nRuns; r++) {
         TH1F* h = (TH1F*)arr->At(r);
         bool hNonEmpty = false;
+        bool runNotBad = runGood(runList->at(r));
         if(h) {
             if(h->GetEntries() > 0) hNonEmpty = true;
         }
-        if(hNonEmpty) leg.AddEntry(h,Form("%i",runList->at(r)),"L");
-        else leg.AddEntry((TObject*)0,Form("%i: n/a",runList->at(r)),"");
+        if(hNonEmpty == true && runNotBad == true) leg.AddEntry(h,Form("%i",runList->at(r)),"L");
+        else if(!hNonEmpty) leg.AddEntry((TObject*)0,Form("%i: N/A",runList->at(r)),"");
+        else if(!runNotBad) leg.AddEntry((TObject*)0,Form("%i: bad",runList->at(r)),"");
     }
     leg.SetTextFont(63);
     leg.SetTextSize(17);

@@ -8,7 +8,7 @@ plotSingle=""
 plotComparison="True"
 
 # input file selection:
-inputFile='singleRun.txt'
+#inputFile='singleRun.txt'
 ## aQC meeting 2023-01-24:
 #inputFile='LHC22i1_passMC_O2-3486.txt'
 #inputFile='LHC22o_O2-3496_gr01.txt'
@@ -39,9 +39,18 @@ inputFile='singleRun.txt'
 #inputFile='LHC22r_O2-3574_gr01.txt'
 #inputFile='LHC22t_O2-3578_gr01.txt'
 ## aQC meeting 2023-03-07
+#inputFile='LHC22o_O2-3597.txt'
+#inputFile='LHC22r_O2-3574.txt'
+#inputFile='LHC22t_O2-3578.txt'
+## aQC meeting 2023-03-14
+#inputFile='LHC22o_O2-3597_01.txt'
+#inputFile='LHC22o_O2-3597_02.txt'
+inputFile='LHC22o_O2-3597_03.txt'
+#inputFile='LHC22r_O2-3574.txt'
+#inputFile='LHC22t_O2-3578.txt'
 
-#root -q 'aQC_downloadHistos.cxx("'inputRunLists/$inputFile'")'
-#root -q 'aQC_plotRunGroup.cxx("'inputRunLists/$inputFile'")'
+root -q 'aQC_downloadHistos.cxx("'inputRunLists/$inputFile'")'
+root -q 'aQC_plotRunGroup.cxx("'inputRunLists/$inputFile'")'
 
 n=1 
 period=""
